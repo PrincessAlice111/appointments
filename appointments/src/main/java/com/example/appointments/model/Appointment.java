@@ -1,4 +1,4 @@
-package com.example.appointments;
+package com.example.appointments.model;
 
 public class Appointment {
     private int id;

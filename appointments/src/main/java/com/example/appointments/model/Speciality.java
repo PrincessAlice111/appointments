@@ -1,10 +1,10 @@
-package com.example.appointments;
+package com.example.appointments.model;
 
-public class Status {
+public class Speciality {
     private int id;
     private String name;
 
-    public Status(
+    public Speciality(
             int id,
             String name) {
         this.id = id;

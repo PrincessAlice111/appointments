@@ -1,10 +1,14 @@
-package com.example.appointments;
+package com.example.appointments.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.appointments.model.Appointment;
+import com.example.appointments.model.Doctor;
+import com.example.appointments.model.Speciality;
+import com.example.appointments.model.Status;
 
 @RestController
 public class AppointmentController {
