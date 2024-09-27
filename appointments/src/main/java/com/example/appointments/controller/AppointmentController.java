@@ -3,6 +3,8 @@ package com.example.appointments.controller;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,27 +24,60 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @GetMapping
-    public List<Appointment> getAllAppointments() {
-        return appointmentService.getAllAppointments();
+    public ResponseEntity<Object> getAllAppointments() {
+        List<Appointment> appointments = appointmentService.getAllAppointments();
+        return ResponseEntity.ok(appointments);
     }
 
     @GetMapping("/{id}")
-    public Optional<Appointment> getAppointmentById(@PathVariable Long id) {
-        return appointmentService.getAppointmentById(id);
+    public ResponseEntity<Object> getAppointmentById(@PathVariable Long id) {
+        Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
+        if (appointment.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Appointment " + id + " does not exist.");
+        }
+        return ResponseEntity.ok(appointment);
     }
 
     @PostMapping
-    public Appointment createAppointment(@Validated @RequestBody Appointment appointment) {
-        return appointmentService.createAppointment(appointment);
+    public ResponseEntity<Object> createAppointment(@Validated @RequestBody Appointment newAppointment) {
+        Appointment createdAppointment = appointmentService.createAppointment(newAppointment);
+        if (createdAppointment == null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Appointment could not be created.");
+        }
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("Appointment " + createdAppointment.getId() + " created successfully.");
     }
 
     @PutMapping("/{id}")
-    public Appointment updateAppointment(@PathVariable Long id, @Validated @RequestBody Appointment appointment) {
-        return appointmentService.updateAppointment(id, appointment);
+    public ResponseEntity<Object> updateAppointment(@PathVariable Long id, @Validated @RequestBody Appointment newAppointment) {
+        Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
+        if (appointment.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Appointment " + id + " does not exist.");
+        }
+        appointmentService.updateAppointment(id, newAppointment);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Appointment " + id + " updated successfully.");
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAppointment(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteAppointment(@PathVariable Long id) {
+        Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
+        if (appointment.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Appointment " + id + " does not exist.");
+        }
         appointmentService.deleteAppointment(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Appointment " + id + " deleted successfully.");
     }
 }
