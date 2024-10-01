@@ -8,10 +8,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "appointment")
-public class Appointment {
+public class Appointment extends RepresentationModel<Appointment> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

@@ -2,7 +2,13 @@ package com.example.appointments.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +32,15 @@ public class AppointmentController {
     @GetMapping
     public ResponseEntity<Object> getAllAppointments() {
         List<Appointment> appointments = appointmentService.getAllAppointments();
-        return ResponseEntity.ok(appointments);
+        AppointmentController controller = methodOn(AppointmentController.class);
+        List<EntityModel<Appointment>> appointmentList = appointments.stream().map(appointment -> {
+            EntityModel<Appointment> model = EntityModel.of(appointment);
+            model.add(linkTo(controller.getAppointmentById(appointment.getId())).withSelfRel());
+            return model;
+        }).collect(Collectors.toList());
+        CollectionModel<EntityModel<Appointment>> model = CollectionModel.of(appointmentList);
+        model.add(linkTo(controller.getAllAppointments()).withSelfRel());
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")
@@ -37,7 +51,11 @@ public class AppointmentController {
                     .status(HttpStatus.NOT_FOUND)
                     .body("Appointment " + id + " does not exist.");
         }
-        return ResponseEntity.ok(appointment);
+        AppointmentController controller = methodOn(AppointmentController.class);
+        EntityModel<Optional<Appointment>> model = EntityModel.of(appointment);
+        model.add(linkTo(controller.getAppointmentById(id)).withSelfRel());
+        model.add(linkTo(controller.getAllAppointments()).withRel(IanaLinkRelations.COLLECTION));
+        return ResponseEntity.ok(model);
     }
 
     @PostMapping
